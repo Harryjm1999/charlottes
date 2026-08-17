@@ -157,3 +157,29 @@
     color: var(--color-foreground);
   }
 }
+
+@layer base {
+  body {
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+  }
+}
+
+@utility deco-rule {
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    var(--brass) 20%,
+    var(--brass) 80%,
+    transparent
+  );
+  height: 1px;
+}
+
+@utility panel-deep {
+  background: var(--gradient-deep);
+  color: oklch(0.97 0.02 92);
+}
