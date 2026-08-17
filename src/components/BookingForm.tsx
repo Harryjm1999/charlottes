@@ -7,7 +7,7 @@ const inputClass =
   "w-full rounded-sm border border-border bg-card px-3 py-2.5 text-sm outline-none transition-colors focus:border-brass focus:ring-2 focus:ring-brass/30";
 
 export function BookingForm({ defaultSlug, lockLocation = false }: Props) {
-  const [slug, setSlug] = useState(defaultSlug ?? restaurants[0].slug);
+  const [slug, setSlug] = useState(defaultSlug ?? "fair-oak");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
