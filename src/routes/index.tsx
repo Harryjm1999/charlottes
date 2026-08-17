@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
 import { restaurants } from "@/data/restaurants";
-import hero from "@/assets/charlottes-fair-oak.jpg";
+const hero = "/menus/rest-7.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
