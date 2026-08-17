@@ -22,10 +22,12 @@ export default defineConfig({
         filename: "sw.js",
         devOptions: { enabled: false },
         manifest: false,
+        outDir: "dist/client",
         workbox: {
-          globDirectory: ".output/public",
+          globDirectory: "dist/client",
           globPatterns: ["**/*.{js,css,png,jpg,jpeg,svg,webp,woff2,webmanifest}"],
           globIgnores: ["**/node_modules/**", "**/_server/**"],
+
           maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
           navigateFallback: "/",
           navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/_serverFn\//],
