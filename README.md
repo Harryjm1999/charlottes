@@ -27,3 +27,23 @@ npm run dev
 - TypeScript
 - React
 - Tailwind CSS
+
+## iOS app (Capacitor)
+
+The web app is wrapped as a native iOS app with Capacitor.
+
+Requirements: a Mac with Xcode installed.
+
+1. Export the project to GitHub and `git clone` it locally.
+2. `npm install`
+3. `npx cap add ios`
+4. `npm run build && npx cap sync ios`
+5. `npx cap open ios` — then run on a simulator or device from Xcode.
+
+`capacitor.config.ts` points the app at https://charlottes.lovable.app so content
+stays up to date without resubmitting the app. To ship a fully self-contained
+build, delete the `server` block and re-run step 4.
+
+To publish to the App Store you need an Apple Developer account ($99/yr), then
+set the bundle ID, signing team, app icon and launch screen in Xcode and use
+Product > Archive.
