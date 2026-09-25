@@ -1,7 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import logo from "@/assets/in-excess-logo.png";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export function SiteHeader() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   return (
     <header className="panel-deep sticky top-0 z-40 border-b border-brass/30">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
@@ -11,10 +15,30 @@ export function SiteHeader() {
             Charlotte's
           </span>
         </Link>
-        <nav className="flex items-center gap-6 text-sm uppercase tracking-[0.18em]">
-          <Link to="/" className="opacity-80 transition-opacity hover:opacity-100">
+        <nav className="flex items-center gap-4 text-sm uppercase tracking-[0.18em] sm:gap-6">
+          <Link to="/" className="hidden opacity-80 transition-opacity hover:opacity-100 sm:inline">
             Restaurants
           </Link>
+          {user ? (
+            <>
+              <Link to="/account" className="opacity-80 transition-opacity hover:opacity-100">
+                Account
+              </Link>
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  navigate({ to: "/auth", replace: true });
+                }}
+                className="uppercase opacity-80 transition-opacity hover:opacity-100"
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link to="/auth" className="opacity-80 transition-opacity hover:opacity-100">
+              Sign in
+            </Link>
+          )}
           <Link
             to="/book"
             className="rounded-sm border border-brass px-4 py-2 text-brass transition-colors hover:bg-brass hover:text-deep"
