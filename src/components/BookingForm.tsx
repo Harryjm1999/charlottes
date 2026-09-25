@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { restaurants } from "@/data/restaurants";
+import { supabase } from "@/integrations/supabase/client";
 
 type Props = { defaultSlug?: string; lockLocation?: boolean };
 
@@ -16,6 +17,8 @@ export function BookingForm({ defaultSlug, lockLocation = false }: Props) {
   const [guests, setGuests] = useState("2");
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const restaurant = restaurants.find((r) => r.slug === slug)!;
 
@@ -46,9 +49,19 @@ export function BookingForm({ defaultSlug, lockLocation = false }: Props) {
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        setSubmitted(true);
+        setBusy(true);
+        setError(null);
+        const { data: { session } } = await supabase.auth.getSession();
+        const { error } = await supabase.from("bookings").insert({
+          restaurant_slug: slug, name, email, phone,
+          booking_date: date, booking_time: time, guests: Number(guests),
+          notes: notes || null, user_id: session?.user.id ?? null,
+        });
+        setBusy(false);
+        if (error) setError("Sorry, we couldn't send that. Please try again or call us.");
+        else setSubmitted(true);
       }}
       className="rounded-sm border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8"
     >
@@ -148,11 +161,13 @@ export function BookingForm({ defaultSlug, lockLocation = false }: Props) {
         </div>
       </div>
 
+      {error && <p className="mt-4 text-center text-sm text-destructive">{error}</p>}
       <button
         type="submit"
-        className="mt-6 w-full rounded-sm bg-primary px-6 py-3 text-xs uppercase tracking-[0.22em] text-primary-foreground transition-opacity hover:opacity-90"
+        disabled={busy}
+        className="mt-6 w-full rounded-sm bg-primary px-6 py-3 text-xs uppercase tracking-[0.22em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        Request table
+        {busy ? "Sending…" : "Request table"}
       </button>
       <p className="mt-3 text-center text-xs text-muted-foreground">
         Requests are confirmed by the team — or call {restaurant.phone} to book straight away.
