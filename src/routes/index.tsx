@@ -46,8 +46,8 @@ function Index() {
           </h1>
           <div className="deco-rule my-6 w-48" />
           <p className="max-w-xl text-sm opacity-90 sm:text-base">
-            An eclectic dining experience where art deco glamour meets botanical luxury — breakfasts,
-            artisan light lunches and locally sourced sweet treats.
+            Breakfasts, artisan light lunches and locally sourced sweet treats, served in a
+            setting where art deco glamour meets botanical luxury.
           </p>
           <Link
             to="/book"
