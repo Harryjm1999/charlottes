@@ -60,6 +60,14 @@ export function SiteFooter() {
           Charlotte's Restaurants &amp; Tea Rooms are found inside In-Excess Garden Centres across
           Hampshire, Wiltshire and Dorset.
         </p>
+        <p className="mt-4 flex gap-5 text-xs uppercase tracking-[0.18em]">
+          <Link to="/privacy" className="text-brass transition-opacity hover:opacity-80">
+            Privacy policy
+          </Link>
+          <Link to="/terms" className="text-brass transition-opacity hover:opacity-80">
+            Terms &amp; conditions
+          </Link>
+        </p>
       </div>
     </footer>
   );
