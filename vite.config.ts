@@ -12,6 +12,9 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+    // Emit a static index.html shell so the app can be bundled into the
+    // native iOS app (Capacitor webDir: dist/client) and run offline.
+    spa: { enabled: true },
   },
   vite: {
     plugins: [
