@@ -126,7 +126,8 @@ function BookingsTab({ slugs }: { slugs: string[] }) {
     }
     return counts;
   }, [bookings, rest]);
-  const [year, monthNumber] = month.split("-").map(Number);
+  const year = Number(month.slice(0, 4));
+  const monthNumber = Number(month.slice(5, 7));
   const firstWeekday = (new Date(year, monthNumber - 1, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, monthNumber, 0).getDate();
   const calendarDays = Array.from({ length: firstWeekday + daysInMonth }, (_, index) =>
@@ -171,13 +172,13 @@ function BookingsTab({ slugs }: { slugs: string[] }) {
           </div>
           <div
             className="mt-4 select-none touch-pan-y"
-            onTouchStart={(event) => { const touch = event.touches[0]; if (touch) event.currentTarget.dataset.swipeStart = `${touch.clientX},${touch.clientY}`; }}
+            onTouchStart={(event) => { const touch = event.touches[0]; if (touch) event.currentTarget.dataset['swipeStart'] = `${touch.clientX},${touch.clientY}`; }}
             onTouchEnd={(event) => {
-              const start = event.currentTarget.dataset.swipeStart;
+              const start = event.currentTarget.dataset['swipeStart'];
               const touch = event.changedTouches[0];
               if (!start || !touch) return;
-              delete event.currentTarget.dataset.swipeStart;
-              const [startX, startY] = start.split(",").map(Number);
+              delete event.currentTarget.dataset['swipeStart'];
+              const [startX = 0, startY = 0] = start.split(",").map(Number);
               const dx = touch.clientX - startX;
               if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(touch.clientY - startY) * 1.5) moveMonth(dx < 0 ? 1 : -1);
             }}
