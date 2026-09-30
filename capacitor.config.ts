@@ -4,12 +4,8 @@ const config: CapacitorConfig = {
   appId: "app.lovable.charlottes",
   appName: "Charlotte's",
   webDir: "dist/client",
-  server: {
-    // Loads the live published site so the app always shows the latest content.
-    // Remove this block to ship a fully bundled offline build instead.
-    url: "https://charlottes.lovable.app",
-    cleartext: true,
-  },
+  // No server.url: the app loads its own bundled build from dist/client,
+  // so it runs natively (and offline) without depending on the website.
   ios: {
     contentInset: "always",
     backgroundColor: "#0f2a1d",
