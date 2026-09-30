@@ -37,7 +37,10 @@ function AccountPage() {
   useEffect(() => {
     supabase.from("bookings").select("*").eq("user_id", user.id).order("booking_date", { ascending: false })
       .then(({ data }) => setBookings((data as Booking[]) ?? []));
-    supabase.from("staff_assignments").select("id").limit(1).then(({ data }) => setIsStaff(!!data?.length));
+    supabase.rpc("my_staff_access").then(({ data }) => {
+      const row = Array.isArray(data) ? data[0] : data;
+      setIsStaff(!!row?.slugs?.length);
+    });
   }, [user.id]);
 
   return (
