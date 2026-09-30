@@ -32,7 +32,26 @@ npm run dev
 
 The web app is wrapped as a native iOS app with Capacitor.
 
-Requirements: a Mac with Xcode installed.
+### Option A — no Mac: build in the cloud with Codemagic
+
+This repo includes `codemagic.yaml`, a ready-made build config for
+[Codemagic](https://codemagic.io) (cloud Mac builders, free tier available).
+
+1. Connect this project to GitHub from Lovable (Project settings > GitHub).
+2. Sign up at codemagic.io with your GitHub account and add the repository.
+3. Codemagic detects `codemagic.yaml` automatically — select the
+   "Charlotte's iOS app" workflow.
+4. For signed builds and TestFlight upload, connect your Apple Developer
+   account in Codemagic (Teams > Integrations > App Store Connect) using an
+   App Store Connect API key — Codemagic then handles certificates and
+   provisioning profiles for you.
+5. Start a build. The finished `.ipa` appears as a build artifact and is
+   uploaded to TestFlight automatically when step 4 is set up.
+
+You still need an Apple Developer account ($99/yr) for App Store/TestFlight
+distribution, but no Mac hardware.
+
+### Option B — with a Mac
 
 1. Export the project to GitHub and `git clone` it locally.
 2. `npm install`
