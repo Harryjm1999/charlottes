@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_notes: {
+        Row: {
+          booking_id: string
+          note: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          note?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          note?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_notes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           booking_date: string
@@ -26,6 +52,7 @@ export type Database = {
           notes: string | null
           phone: string
           restaurant_slug: string
+          source: string
           status: string
           user_id: string | null
         }
@@ -40,6 +67,7 @@ export type Database = {
           notes?: string | null
           phone: string
           restaurant_slug: string
+          source?: string
           status?: string
           user_id?: string | null
         }
@@ -54,8 +82,21 @@ export type Database = {
           notes?: string | null
           phone?: string
           restaurant_slug?: string
+          source?: string
           status?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      owner_emails: {
+        Row: {
+          email: string
+        }
+        Insert: {
+          email: string
+        }
+        Update: {
+          email?: string
         }
         Relationships: []
       }
@@ -80,14 +121,44 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_members: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          restaurant_slug: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          restaurant_slug: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          restaurant_slug?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      current_confirmed_email: { Args: { _user_id: string }; Returns: string }
+      is_owner: { Args: { _user_id: string }; Returns: boolean }
       is_staff_for: {
         Args: { _slug: string; _user_id: string }
         Returns: boolean
+      }
+      my_staff_access: {
+        Args: never
+        Returns: {
+          is_owner: boolean
+          slugs: string[]
+        }[]
       }
     }
     Enums: {
