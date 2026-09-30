@@ -77,8 +77,9 @@ the network when available.
    Terms of use (EULA) URL: https://charlottes.lovable.app/terms
    (these are hosted on the published site, so keep the site published even
    though the app itself is bundled).
-5. Add screenshots (6.7" and 5.5" iPhone) and an app description, then
-   Product > Archive in Xcode and upload the build.
+5. Add screenshots (6.7" and 5.5" iPhone) and an app description. Upload the
+   build via Codemagic (automatic TestFlight upload) or, on a Mac,
+   Product > Archive in Xcode.
 
 Note: the app uses sign-in and sends booking requests over the network, so
 select "Yes" for account creation in the App Privacy section if asked.
