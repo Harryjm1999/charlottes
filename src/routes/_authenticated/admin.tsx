@@ -196,7 +196,7 @@ function BookingEditor({ booking, slugs, defaultDate, onClose, onSaved }: {
   booking: Booking | null; slugs: string[]; defaultDate: string; onClose: () => void; onSaved: () => void;
 }) {
   const [f, setF] = useState({
-    restaurant_slug: booking?.restaurant_slug ?? slugs[0],
+    restaurant_slug: booking?.restaurant_slug ?? slugs[0] ?? "",
     name: booking?.name ?? "", email: booking?.email ?? "", phone: booking?.phone ?? "",
     booking_date: booking?.booking_date ?? defaultDate, booking_time: booking?.booking_time ?? "12:00",
     guests: booking?.guests ?? 2, notes: booking?.notes ?? "",
@@ -268,7 +268,7 @@ function BookingEditor({ booking, slugs, defaultDate, onClose, onSaved }: {
 function StaffTab() {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [email, setEmail] = useState("");
-  const [slug, setSlug] = useState(restaurants[0].slug);
+  const [slug, setSlug] = useState(restaurants[0]?.slug ?? "");
   const [err, setErr] = useState("");
 
   async function load() {
