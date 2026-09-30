@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
+import { Button } from "@/components/ui/button";
 import { restaurants } from "@/data/restaurants";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -26,10 +28,8 @@ type Booking = {
 type Staff = { id: string; email: string; restaurant_slug: string };
 
 const rName = (s: string) => restaurants.find((r) => r.slug === s)?.name ?? s;
-const today = () => new Date().toISOString().slice(0, 10);
-const shiftDay = (d: string, n: number) => {
-  const x = new Date(d + "T12:00:00"); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10);
-};
+const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const today = () => dateKey(new Date());
 const prettyDay = (d: string) =>
   new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
@@ -89,6 +89,7 @@ function BookingsTab({ slugs }: { slugs: string[] }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [view, setView] = useState<"day" | "pending" | "all">("day");
   const [day, setDay] = useState(today());
+  const [month, setMonth] = useState(() => today().slice(0, 7));
   const [rest, setRest] = useState<string>("all");
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Booking | "new" | null>(null);
@@ -114,6 +115,30 @@ function BookingsTab({ slugs }: { slugs: string[] }) {
   }, [bookings, rest, view, day, q]);
   const covers = shown.filter((b) => b.status !== "declined").reduce((n, b) => n + b.guests, 0);
   const pendingCount = bookings.filter((b) => b.status === "pending").length;
+  const calendarCounts = useMemo(() => {
+    const counts: Record<string, { total: number; pending: number }> = {};
+    for (const b of bookings) {
+      if ((rest !== "all" && b.restaurant_slug !== rest) || b.status === "declined") continue;
+      const count = counts[b.booking_date] ?? { total: 0, pending: 0 };
+      count.total += 1;
+      if (b.status === "pending") count.pending += 1;
+      counts[b.booking_date] = count;
+    }
+    return counts;
+  }, [bookings, rest]);
+  const [year, monthNumber] = month.split("-").map(Number);
+  const firstWeekday = (new Date(year, monthNumber - 1, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, monthNumber, 0).getDate();
+  const calendarDays = Array.from({ length: firstWeekday + daysInMonth }, (_, index) =>
+    index < firstWeekday ? null : dateKey(new Date(year, monthNumber - 1, index - firstWeekday + 1)));
+
+  function moveMonth(offset: number) {
+    const next = new Date(year, monthNumber - 1 + offset, 1);
+    const selectedDate = Number(day.slice(8, 10));
+    const nextDay = Math.min(selectedDate, new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate());
+    setMonth(dateKey(next).slice(0, 7));
+    setDay(dateKey(new Date(next.getFullYear(), next.getMonth(), nextDay)));
+  }
 
   return (
     <>
@@ -135,13 +160,57 @@ function BookingsTab({ slugs }: { slugs: string[] }) {
       </div>
 
       {view === "day" && (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <button className={`${btn} border border-border`} onClick={() => setDay(shiftDay(day, -1))}>‹</button>
-          <input type="date" className={`${input} w-auto`} value={day} onChange={(e) => setDay(e.target.value)} />
-          <button className={`${btn} border border-border`} onClick={() => setDay(shiftDay(day, 1))}>›</button>
-          <button className={`${btn} border border-border`} onClick={() => setDay(today())}>Today</button>
-          <span className="font-display text-lg text-primary">{prettyDay(day)}</span>
-          <span className="text-sm text-muted-foreground">· {shown.length} bookings · {covers} guests</span>
+        <div className="mt-6">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 sm:grid-cols-[auto_minmax(0,1fr)_auto_auto]">
+            <Button variant="outline" size="icon" onClick={() => moveMonth(-1)} aria-label="Previous month" title="Previous month" className="shrink-0"><ChevronLeft /></Button>
+            <h2 className="min-w-0 truncate text-center font-display text-2xl text-primary sm:text-3xl">
+              {new Date(year, monthNumber - 1, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
+            </h2>
+            <Button variant="outline" size="sm" onClick={() => { const current = today(); setDay(current); setMonth(current.slice(0, 7)); }}>Today</Button>
+            <Button variant="outline" size="icon" onClick={() => moveMonth(1)} aria-label="Next month" title="Next month" className="shrink-0"><ChevronRight /></Button>
+          </div>
+          <div
+            className="mt-4 select-none touch-pan-y"
+            onTouchStart={(event) => { const touch = event.touches[0]; if (touch) event.currentTarget.dataset.swipeStart = `${touch.clientX},${touch.clientY}`; }}
+            onTouchEnd={(event) => {
+              const start = event.currentTarget.dataset.swipeStart;
+              const touch = event.changedTouches[0];
+              if (!start || !touch) return;
+              delete event.currentTarget.dataset.swipeStart;
+              const [startX, startY] = start.split(",").map(Number);
+              const dx = touch.clientX - startX;
+              if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(touch.clientY - startY) * 1.5) moveMonth(dx < 0 ? 1 : -1);
+            }}
+            aria-label="Booking calendar"
+          >
+            <div className="grid grid-cols-7 border-b border-border pb-2 text-center text-xs uppercase tracking-[0.12em] text-muted-foreground">
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((weekday) => <span key={weekday}>{weekday}</span>)}
+            </div>
+            <div className="grid grid-cols-7 gap-px border border-border bg-border">
+              {calendarDays.map((date, index) => date ? (
+                <Button
+                  key={date}
+                  variant="ghost"
+                  onClick={() => setDay(date)}
+                  aria-label={`${prettyDay(date)}${calendarCounts[date] ? `, ${calendarCounts[date].total} bookings, ${calendarCounts[date].pending} awaiting reply` : ", no bookings"}`}
+                  aria-pressed={date === day}
+                  className={`h-16 min-w-0 flex-col items-start justify-start gap-1 rounded-none px-1.5 py-2 text-left sm:h-24 sm:px-3 ${date === day ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "bg-card hover:bg-secondary"}`}
+                >
+                  <span className={`text-sm font-semibold ${date === today() && date !== day ? "rounded-sm bg-secondary px-1 text-primary" : ""}`}>{Number(date.slice(8))}</span>
+                  {calendarCounts[date] && (
+                    <span className={`w-full truncate text-[10px] leading-tight sm:text-xs ${date === day ? "text-primary-foreground" : "text-muted-foreground"}`}>
+                      {calendarCounts[date].total} <span className="hidden sm:inline">bookings</span><span className="sm:hidden">bkgs</span>
+                      {calendarCounts[date].pending > 0 && <span className={date === day ? "text-primary-foreground" : "text-destructive"}> · {calendarCounts[date].pending} pending</span>}
+                    </span>
+                  )}
+                </Button>
+              ) : <div key={`empty-${index}`} className="h-16 bg-background sm:h-24" aria-hidden="true" />)}
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border pb-3">
+            <h3 className="font-display text-2xl text-primary">{prettyDay(day)}</h3>
+            <span className="text-sm text-muted-foreground">{shown.length} bookings · {covers} guests</span>
+          </div>
         </div>
       )}
 
