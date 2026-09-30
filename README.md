@@ -40,19 +40,24 @@ Requirements: a Mac with Xcode installed.
 4. `npm run build && npx cap sync ios`
 5. `npx cap open ios` — then run on a simulator or device from Xcode.
 
-`capacitor.config.ts` points the app at https://charlottes.lovable.app so content
-stays up to date without resubmitting the app. To ship a fully self-contained
-build, delete the `server` block and re-run step 4.
+The app is fully self-contained: `npm run build` outputs the bundled app to
+`dist/client`, and `npx cap sync ios` copies it into the native app. It runs
+from its own bundled code (no website needed) and works offline thanks to the
+built-in service worker. Sign-in and bookings still use the cloud backend over
+the network when available.
 
 ## App Store submission checklist
 
-1. Publish the latest version of the site first — the app loads
-   https://charlottes.lovable.app, so the published site is what users see.
+1. Run `npm run build && npx cap sync ios` so the native app contains the
+   latest bundled code — the app does not load the website, so whatever you
+   build is what users get.
 2. In Xcode: set the display name, app icon (1024px App Store icon), launch
    screen and signing team (Capabilities > Signing).
 3. In App Store Connect, create the app with bundle ID `app.lovable.charlottes`.
 4. Privacy policy URL: https://charlottes.lovable.app/privacy
    Terms of use (EULA) URL: https://charlottes.lovable.app/terms
+   (these are hosted on the published site, so keep the site published even
+   though the app itself is bundled).
 5. Add screenshots (6.7" and 5.5" iPhone) and an app description, then
    Product > Archive in Xcode and upload the build.
 
