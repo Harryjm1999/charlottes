@@ -14,7 +14,7 @@ export default defineConfig({
     server: { entry: "server" },
     // Emit a static index.html shell so the app can be bundled into the
     // native iOS app (Capacitor webDir: dist/client) and run offline.
-    spa: { enabled: true },
+    spa: { enabled: true, prerender: { outputPath: "/index.html" } },
   },
   vite: {
     plugins: [
