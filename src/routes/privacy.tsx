@@ -28,9 +28,9 @@ function PrivacyPage() {
     <LegalPage
       eyebrow="In-Excess Garden Centres"
       title="Privacy Policy"
-      intro="Charlotte's Restaurants & Tea Rooms are part of In-Excess Garden Centres, so the In-Excess privacy policy applies to this app. You can also"
+      intro="This policy covers the Charlotte's Restaurants & Tea Rooms app and table bookings. For the In-Excess garden centres and online shop, you can"
       sourceUrl="https://www.in-excess.com/policies/privacy-policy"
-      sourceLabel="read it on the In-Excess website"
+      sourceLabel="read the In-Excess privacy policy"
       blocks={privacyBlocks}
     />
   );
