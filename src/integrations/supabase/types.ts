@@ -148,6 +148,7 @@ export type Database = {
     }
     Functions: {
       current_confirmed_email: { Args: { _user_id: string }; Returns: string }
+      delete_own_account: { Args: never; Returns: undefined }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
       is_staff_for: {
         Args: { _slug: string; _user_id: string }
