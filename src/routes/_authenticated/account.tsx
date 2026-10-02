@@ -74,6 +74,25 @@ function AccountPage() {
             ))}
           </ul>
         )}
+        <div className="mt-16 border-t border-border pt-6">
+          <h2 className="font-display text-xl text-destructive">Delete account</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Permanently delete your account. Existing bookings stay with the restaurant but are no longer linked to you.
+          </p>
+          <button
+            type="button"
+            onClick={async () => {
+              if (!window.confirm("Permanently delete your account? This cannot be undone.")) return;
+              const { error } = await supabase.rpc("delete_own_account");
+              if (error) { window.alert("Could not delete account: " + error.message); return; }
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}
+            className="mt-4 rounded-sm border border-destructive px-4 py-2 text-xs uppercase tracking-[0.18em] text-destructive"
+          >
+            Delete my account
+          </button>
+        </div>
       </main>
       <SiteFooter />
     </div>
