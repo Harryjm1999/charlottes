@@ -77,6 +77,7 @@ jobs:
         run: |
           mkdir -p shots
           cp build.log errors.log shots/ 2>/dev/null || true
+          cp ~/Library/Logs/DiagnosticReports/Charlottes* shots/ 2>/dev/null || true
           echo "${GITHUB_SHA} ${{ job.status }}" > shots/result.txt
           cd shots
           git init -q -b ios-ci
