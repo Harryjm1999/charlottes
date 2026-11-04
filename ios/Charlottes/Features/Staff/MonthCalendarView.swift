@@ -13,7 +13,7 @@ struct MonthCalendarView: View {
   let counts: [String: DayCount]
 
   private static let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-  private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
+  private static let cellHeight: CGFloat = 58
 
   /// Each cell of the grid: a day key, or nil for the blanks around the month.
   private var cells: [String?] {
@@ -29,6 +29,11 @@ struct MonthCalendarView: View {
     }
     while cells.count % 7 != 0 { cells.append(nil) }
     return cells
+  }
+
+  private var weeks: [[String?]] {
+    let cells = cells
+    return stride(from: 0, to: cells.count, by: 7).map { Array(cells[$0..<($0 + 7)]) }
   }
 
   var body: some View {
@@ -61,19 +66,29 @@ struct MonthCalendarView: View {
       }
       .buttonStyle(.borderless)
 
-      LazyVGrid(columns: columns, spacing: 0) {
-        ForEach(Self.weekdays, id: \.self) { name in
-          Text(name)
-            .font(AppFont.caption(12))
-            .foregroundStyle(Palette.secondary)
-            .frame(maxWidth: .infinity)
-            .padding(.bottom, 6)
+      // Plain stacks with fixed-height cells, not a lazy grid: this sits in a List row, which
+      // sizes itself from its content and crashes in a layout loop if that height shifts.
+      VStack(spacing: 0) {
+        HStack(spacing: 0) {
+          ForEach(Self.weekdays, id: \.self) { name in
+            Text(name)
+              .font(AppFont.caption(12))
+              .foregroundStyle(Palette.secondary)
+              .lineLimit(1)
+              .frame(maxWidth: .infinity)
+          }
         }
-        ForEach(Array(cells.enumerated()), id: \.offset) { _, key in
-          if let key {
-            dayCell(key)
-          } else {
-            Color.clear.frame(height: 58)
+        .padding(.bottom, 6)
+
+        ForEach(weeks.indices, id: \.self) { index in
+          HStack(spacing: 0) {
+            ForEach(weeks[index].indices, id: \.self) { column in
+              if let key = weeks[index][column] {
+                dayCell(key)
+              } else {
+                Color.clear.frame(maxWidth: .infinity).frame(height: Self.cellHeight)
+              }
+            }
           }
         }
       }
@@ -118,7 +133,7 @@ struct MonthCalendarView: View {
       .foregroundStyle(foreground)
       .padding(.top, 5)
       .frame(maxWidth: .infinity)
-      .frame(height: 58)
+      .frame(height: Self.cellHeight)
       .background(selected ? Palette.primary : Palette.surface)
       .overlay(Rectangle().stroke(Palette.border, lineWidth: 0.5))
     }
