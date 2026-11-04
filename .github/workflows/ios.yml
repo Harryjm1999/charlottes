@@ -84,4 +84,8 @@ jobs:
           git config user.email github-actions@users.noreply.github.com
           git add .
           git commit -q -m "Results from ${GITHUB_SHA}"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ios-ci
+          for attempt in 1 2 3 4 5; do
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ios-ci && exit 0
+            sleep 30
+          done
+          exit 1
