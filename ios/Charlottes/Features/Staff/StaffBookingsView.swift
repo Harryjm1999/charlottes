@@ -86,8 +86,7 @@ struct StaffBookingsView: View {
             day: $day,
             counts: dayCounts
           )
-          .listRowBackground(Color.clear)
-          .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 4, trailing: 0))
+          .unclippedRow()
         }
       }
       .listRowSeparator(.hidden)

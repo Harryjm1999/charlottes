@@ -37,6 +37,11 @@ struct RestaurantDetailView: View {
     .background(Palette.background)
     .navigationTitle(shortTitle)
     .navigationBarTitleDisplayMode(.inline)
+    #if DEBUG
+      .onAppear {
+        if debugScreen == "menu" { openMenu = MenuSelection(index: 0) }
+      }
+    #endif
     .fullScreenCover(item: $openMenu) { selection in
       MenuViewer(menus: menus, start: selection.index)
     }
@@ -102,8 +107,8 @@ struct RestaurantDetailView: View {
       Label("Directions", systemImage: "arrow.triangle.turn.up.right.diamond")
         .font(AppFont.semibold(15))
         .foregroundStyle(Palette.primary)
-        .frame(maxWidth: .infinity, minHeight: 44)
         .padding(.vertical, 14)
+        .frame(maxWidth: .infinity, minHeight: 44)
         .overlay(
           RoundedRectangle(cornerRadius: 10, style: .continuous)
             .stroke(Palette.border, lineWidth: 1)

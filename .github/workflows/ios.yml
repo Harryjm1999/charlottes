@@ -64,10 +64,10 @@ jobs:
           mkdir -p shots
           for appearance in light dark; do
             xcrun simctl ui booted appearance "$appearance"
-            for screen in restaurants restaurant book account staff privacy; do
+            for screen in restaurants restaurant menu book confirmation account auth staff privacy; do
               xcrun simctl terminate booted "$id" || true
               xcrun simctl launch booted "$id" -screen "$screen"
-              sleep 8
+              sleep 12
               xcrun simctl io booted screenshot "shots/$screen-$appearance.png"
             done
           done

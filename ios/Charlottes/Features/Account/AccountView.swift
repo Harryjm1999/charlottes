@@ -40,6 +40,11 @@ struct AccountView: View {
       #endif
       }
     }
+    #if DEBUG
+      .onAppear {
+        if debugScreen == "auth" { isSigningIn = true }
+      }
+    #endif
     .sheet(isPresented: $isSigningIn) { AuthView() }
     .errorAlert($error)
     .alert("Account deleted", isPresented: $deletedNotice) {
@@ -61,8 +66,7 @@ struct AccountView: View {
         }
         .padding(.vertical, 8)
       }
-      .listRowBackground(Color.clear)
-      .listRowInsets(EdgeInsets())
+      .unclippedRow()
 
       legalSection
     }

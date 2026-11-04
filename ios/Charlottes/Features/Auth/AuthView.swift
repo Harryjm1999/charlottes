@@ -105,8 +105,7 @@ struct AuthView: View {
         }
         .buttonStyle(.brand(fullWidth: true))
         .disabled(busy)
-        .listRowInsets(EdgeInsets())
-        .listRowBackground(Color.clear)
+        .unclippedRow()
       } footer: {
         if let errorText {
           Text(errorText)

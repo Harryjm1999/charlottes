@@ -150,6 +150,14 @@ extension View {
     listRowBackground(Palette.surface)
   }
 
+  /// A row with no background. The inset keeps its content clear of the corners
+  /// that the list rounds off on each section.
+  func unclippedRow() -> some View {
+    self
+      .listRowBackground(Color.clear)
+      .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+  }
+
   /// Adds a Done button above the keyboard; the phone keypad has no return key.
   func keyboardDoneButton() -> some View {
     toolbar {

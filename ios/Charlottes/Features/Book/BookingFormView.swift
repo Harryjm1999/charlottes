@@ -65,6 +65,13 @@ struct BookingFormView: View {
       if let lockedRestaurant { slug = lockedRestaurant.slug }
       if email.isEmpty, let address = session.user?.email { email = address }
       chooseTime()
+      #if DEBUG
+        if debugScreen == "confirmation" {
+          submitted = Submitted(
+            firstName: "Sam", restaurant: restaurant, dayKey: Fmt.key(Date()), time: "12:30", guests: 2
+          )
+        }
+      #endif
     }
     .onChange(of: date) { chooseTime() }
     .onChange(of: slug) { chooseTime() }
@@ -81,7 +88,7 @@ struct BookingFormView: View {
   private var form: some View {
     Form {
       if lockedRestaurant == nil {
-        Section("Restaurant") {
+        Section {
           Picker("Restaurant", selection: $slug) {
             ForEach(Restaurant.all) { Text($0.name).tag($0.slug) }
           }
@@ -89,8 +96,8 @@ struct BookingFormView: View {
         }
         .brandRow()
       } else {
-        Section("Restaurant") {
-          Text(restaurant.name).foregroundStyle(Palette.primary)
+        Section {
+          LabeledContent("Restaurant", value: restaurant.name)
         }
         .brandRow()
       }
@@ -148,8 +155,7 @@ struct BookingFormView: View {
         }
         .buttonStyle(.brand(fullWidth: true))
         .disabled(isSending || slots.isEmpty)
-        .listRowInsets(EdgeInsets())
-        .listRowBackground(Color.clear)
+        .unclippedRow()
       } footer: {
         VStack(alignment: .leading, spacing: 8) {
           if let sendError {

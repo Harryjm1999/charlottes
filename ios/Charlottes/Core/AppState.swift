@@ -49,6 +49,15 @@ final class SessionStore {
   }
 }
 
+#if DEBUG
+  /// The screen the screenshot job asked for.
+  let debugScreen: String? = {
+    let args = ProcessInfo.processInfo.arguments
+    guard let index = args.firstIndex(of: "-screen"), index + 1 < args.count else { return nil }
+    return args[index + 1]
+  }()
+#endif
+
 enum AppTab: String, Hashable {
   case restaurants, book, account
 }
@@ -72,14 +81,16 @@ final class AppRouter {
   init() {
     #if DEBUG
       // Lets the screenshot job open a given screen:
-      //   -screen restaurants | restaurant | book | account | staff | privacy
-      let args = ProcessInfo.processInfo.arguments
-      if let index = args.firstIndex(of: "-screen"), index + 1 < args.count {
-        let screen = args[index + 1]
+      //   -screen restaurants | restaurant | menu | book | confirmation | account | auth | staff | privacy
+      if let screen = debugScreen {
         if let tab = AppTab(rawValue: screen) {
           self.tab = tab
-        } else if screen == "restaurant", let first = Restaurant.all.first {
+        } else if screen == "restaurant" || screen == "menu", let first = Restaurant.all.first {
           restaurantPath = [first]
+        } else if screen == "confirmation" {
+          tab = .book
+        } else if screen == "auth" {
+          tab = .account
         } else if screen == "privacy" {
           tab = .account
           accountPath.append(LegalDoc.privacy)
