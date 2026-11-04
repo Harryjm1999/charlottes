@@ -1,0 +1,87 @@
+name: iOS build
+
+# Compiles the native iOS app in ios/ on GitHub's Macs, runs it in a 6.9" iPhone simulator
+# and screenshots each screen. The build log and screenshots are pushed to the `ios-ci`
+# branch so they can be read without signing in to anything. No signing is involved.
+on:
+  push:
+    branches: [main, ios-app]
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Same Xcode as the TestFlight release, so a pass here means it will upload.
+    runs-on: macos-26
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Pick a 6.9-inch iPhone simulator
+        run: |
+          device=$(xcrun simctl list devices available | grep -oE "iPhone [0-9]+ Pro Max" | sort -V | tail -n 1)
+          test -n "$device"
+          echo "DEVICE=$device" >> "$GITHUB_ENV"
+
+      - name: Build for the simulator
+        run: |
+          status=0
+          xcodebuild \
+            -project Charlottes.xcodeproj \
+            -scheme Charlottes \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,name=$DEVICE" \
+            -derivedDataPath build \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            build > build.log 2>&1 || status=$?
+          grep -E "error:" build.log | sort -u > errors.log || true
+          cat errors.log
+          tail -n 15 build.log
+          exit $status
+
+      - name: Take screenshots
+        run: |
+          id=uk.co.inexcess.charlottes.test
+          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl bootstatus "$DEVICE" -b
+          xcrun simctl status_bar booted override --time "9:41" --dataNetwork wifi --wifiBars 3 --cellularBars 4 --batteryState charged --batteryLevel 100
+          xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/Charlottes.app
+          mkdir -p shots
+          for appearance in light dark; do
+            xcrun simctl ui booted appearance "$appearance"
+            for screen in restaurants restaurant book account staff privacy; do
+              xcrun simctl terminate booted "$id" || true
+              xcrun simctl launch booted "$id" -screen "$screen"
+              sleep 8
+              xcrun simctl io booted screenshot "shots/$screen-$appearance.png"
+            done
+          done
+
+      - name: Publish results to the ios-ci branch
+        if: always()
+        run: |
+          mkdir -p shots
+          cp build.log errors.log shots/ 2>/dev/null || true
+          echo "${GITHUB_SHA} ${{ job.status }}" > shots/result.txt
+          cd shots
+          git init -q -b ios-ci
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          git add .
+          git commit -q -m "Results from ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ios-ci
